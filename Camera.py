@@ -97,9 +97,9 @@ class Camera:
             connection.close()
             client_socket.close()
 
-    def start(self, role):
+    def start(self, role, host, port=4999):
         # begin socket connection
         if role == 'server':
-            self.server('', 4999)
+            self.server('', port)
         elif role == 'client':
-            self.client('', 4999)
+            self.client('', port)
