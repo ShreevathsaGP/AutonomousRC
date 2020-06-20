@@ -3,6 +3,7 @@ import picamera
 import socket
 import struct
 import time
+from system import HOST, PORT
 
 class Camera:
     def __init__(self):
@@ -72,3 +73,7 @@ class Camera:
         finally:
             connection.cose()
             client_socket.close()
+
+    def start(role):
+        if role == 'server':
+            server('')
