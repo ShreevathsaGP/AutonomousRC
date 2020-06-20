@@ -100,6 +100,6 @@ class Camera:
     def start(self, role, host, port=4999):
         # begin socket connection
         if role == 'server':
-            self.server('', port)
+            self.server(host, port)
         elif role == 'client':
-            self.client('', port)
+            self.client(host, port)
