@@ -1,5 +1,6 @@
+# Camera.py
 
-import picamera
+# import global modules
 import socket
 import struct
 import time
@@ -7,12 +8,14 @@ from system import HOST, PORT
 
 class Camera:
     def __init__(self):
+        # initializing constants
         self.width = 500
         self.height = 480
         self.vflip = True
         self.hflip = False
 
     def server(self, host, port):
+        # importing server spcific modules
         from PIL import Image
         import matplot.lib.pyplot as plt
         import cv2
@@ -41,9 +44,14 @@ class Camera:
                 print("Frame is %dx%d" % frame.size())
                 frame.verify()
                 print("Frame is verified")
+        finally:
+            connection.close()
+            server_socket.close()
         
-    
-    def client(self, host, port):
+    def client(self, host, port):\
+        # importing client specific modules
+        import picamera
+        
         client_socket = socket.socket()
         client_socket.connect((host, port))
 
@@ -76,4 +84,8 @@ class Camera:
 
     def start(role):
         if role == 'server':
-            server('')
+            self.server((HOST, PORT))
+        elif role == 'client':
+            self.client((HOST, PORT))
+
+Camera.start('server')
