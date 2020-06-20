@@ -11,8 +11,8 @@ import numpy as np
 class Camera:
     def __init__(self):
         # initializing constants
-        self.width = 500
-        self.height = 480
+        self.width = 250
+        self.height = 240
         self.vflip = True
 
     def server(self, host, port):
@@ -43,8 +43,8 @@ class Camera:
                 image_stream.seek(0)
                 frame = Image.open(image_stream)
 
-                # display frame
-                cv2.imshow('RasPi-Feed', np.array(frame))
+                # display (colour converted) frame
+                cv2.imshow('RasPi-Feed', cv2.cvtColor(np.array(frame), cv2.COLOR_BGR2RGB))
                 if cv2.waitKey(25) & 0xff == ord('q'):
                     cv2.destroyAllWindows()
                     break
