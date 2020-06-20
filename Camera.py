@@ -70,6 +70,7 @@ class Camera:
             camera = picamera.PiCamera()
             camera.vflip = self.vflip
             camera.resolution = (self.width, self.height)
+            camera.framerate = 30
 
             # start and warm up camera => 1 second
             camera.start_preview()
@@ -77,7 +78,7 @@ class Camera:
 
             start_time = time.time()
             image_stream = io.BytesIO()
-            for _ in camera.capture_continuous(image_stream, 'jpeg'):
+            for _ in camera.capture_continuous(image_stream, 'jpeg', use_video_port=True):
                 # write current position of file into connection
                 connection.write(struct.pack('<L', image_stream.tell()))
                 # clean internal buffer
