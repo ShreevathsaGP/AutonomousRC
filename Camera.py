@@ -4,7 +4,6 @@
 import socket
 import struct
 import time
-from system import HOST, PORT
 import io
 import pickle
 import numpy as np
@@ -101,8 +100,8 @@ class Camera:
     def start(self, role):
         # begin socket connection
         if role == 'server':
-            self.server(HOST, PORT)
+            self.server('', 4999)
         elif role == 'client':
-            self.client('', PORT)
+            self.client('', 4999)
 
 Camera().start('server')
