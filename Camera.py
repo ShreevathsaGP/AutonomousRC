@@ -79,7 +79,7 @@ class Camera:
             image_stream = io.BytesIO()
             for _ in camera.capture_continuous(image_stream, 'jpeg'):
                 # write current position of file into connection
-                connnection.write(struct.pack('<L', image_stream.tell()))
+                connection.write(struct.pack('<L', image_stream.tell()))
                 # clean internal buffer
                 connection.flush()
 
@@ -94,13 +94,13 @@ class Camera:
             connection.write(struct.pack('<L', 0))
         finally:
             # close sockets
-            connection.cose()
+            connection.close()
             client_socket.close()
 
     def start(self, role):
         # begin socket connection
         if role == 'server':
-            self.server('', 4999)
+            self.server('192.168.43.216', 4999)
         elif role == 'client':
             self.client('', 4999)
 
