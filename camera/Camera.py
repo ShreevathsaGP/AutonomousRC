@@ -10,8 +10,8 @@ import numpy as np
 
 class Camera:
     def __init__(self):
-        # initializing constants
-        self.width = 250
+        # initializing contants
+        self.width = 320
         self.height = 240
         self.vflip = True
 
