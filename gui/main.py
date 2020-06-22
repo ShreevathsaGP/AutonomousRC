@@ -2,46 +2,77 @@ from PyQt5 import QtWidgets
 from PyQt5.QtWidgets import QApplication, QMainWindow
 from PyQt5 import QtCore, QtGui, QtWidgets
 import sys
+import time, datetime
 
-class MyWindow(QMainWindow):
+class ARC_Companion(QMainWindow):
     def __init__(self):
-        super(MyWindow, self).__init__()
+        super(ARC_Companion, self).__init__()
+
+        # initializing global constants
+        self.mode = 'training_mode'
+    
+        # initualizing UI
         self.initUI()
 
+    def change_mode(self, mode):
+        if mode == 'training_mode' and self.mode != 'training_mode':
+            # set new mode
+            self.mode = 'training_mode'
+            
+            # select training_mode
+            self.icon.addPixmap(QtGui.QPixmap("assets/training_mode_selected.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+            self.training_button.setIcon(self.icon)
+
+            # deselect testing_mode
+            self.icon1.addPixmap(QtGui.QPixmap("assets/testing_mode.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+            self.testing_button.setIcon(self.icon1)
+            
+        elif mode == 'testing_mode' and self.mode != 'testing_mode':
+            # set new mode
+            self.mode = 'testing_mode'
+            
+            # select testing_mode
+            self.icon1.addPixmap(QtGui.QPixmap("assets/testing_mode_selected.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+            self.testing_button.setIcon(self.icon1)
+
+            # deselect training_mode
+            self.icon.addPixmap(QtGui.QPixmap("assets/training_mode.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+            self.training_button.setIcon(self.icon)
+    
     def initUI(self):
         # background
         self.setObjectName("MainWindow")
         self.setEnabled(True)
-        self.resize(803, 700)
+        self.setFixedSize(803, 700)
         self.setAutoFillBackground(False)
         self.setStyleSheet("background: #DCDCDC    ;  border: 0px solid black;")
         self.centralwidget = QtWidgets.QWidget(self)
         self.centralwidget.setObjectName("centralwidget")
 
-        # training_mode
+        # training mode
         self.training_button = QtWidgets.QPushButton(self.centralwidget)
         self.training_button.setGeometry(QtCore.QRect(0, 0, 411, 61))
         self.training_button.setText("")
-        icon = QtGui.QIcon()
-        icon.addPixmap(QtGui.QPixmap("assets/training_mode.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
-        self.training_button.setIcon(icon)
+        self.icon = QtGui.QIcon()
+        self.icon.addPixmap(QtGui.QPixmap("assets/training_mode_selected.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        self.training_button.setIcon(self.icon)
         self.training_button.setIconSize(QtCore.QSize(400, 55))
         self.training_button.setObjectName("training_button")
 
-        # testing_mode
+        # testing mode
         self.testing_button = QtWidgets.QPushButton(self.centralwidget)
         self.testing_button.setGeometry(QtCore.QRect(400, 0, 401, 61))
         self.testing_button.setText("")
-        icon1 = QtGui.QIcon()
-        icon1.addPixmap(QtGui.QPixmap("assets/testing_mode.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
-        self.testing_button.setIcon(icon1)
+        self.icon1 = QtGui.QIcon()
+        self.icon1.addPixmap(QtGui.QPixmap("assets/testing_mode.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        self.testing_button.setIcon(self.icon1)
         self.testing_button.setIconSize(QtCore.QSize(400, 55))
         self.testing_button.setObjectName("testing_button")
         self.label = QtWidgets.QLabel(self.centralwidget)
 
-        # raspberry pi feed
+        # design and set raspberry pi camera feed
         self.label.setGeometry(QtCore.QRect(6, 63, 794, 471))
-        self.label.setStyleSheet("background: white; border: 3px solid black")
+        self.label.setStyleSheet("background: black; border: 3px solid black")
         self.label.setText("")
         self.label.setObjectName("label")
 
@@ -89,6 +120,59 @@ class MyWindow(QMainWindow):
         self.right.setIconSize(QtCore.QSize(111, 111))
         self.right.setObjectName("right")
 
+        # design ultrasonic feed
+        self.label_2 = QtWidgets.QLabel(self.centralwidget)
+        self.label_2.setGeometry(QtCore.QRect(6, 538, 241, 111))
+        self.font = QtGui.QFont()
+        self.font.setFamily("Optima")
+        self.font.setPointSize(14)
+        self.label_2.setFont(self.font)
+        self.label_2.setStyleSheet("background: white; border: 2px solid black;")
+        self.label_2.setText("")
+        self.label_2.setObjectName("label_2")
+        self.label_3 = QtWidgets.QLabel(self.centralwidget)
+        self.label_3.setGeometry(QtCore.QRect(10, 550, 131, 50))
+        self.font = QtGui.QFont()
+        self.font.setFamily("Optima")
+        self.font.setPointSize(24)
+        self.label_3.setFont(self.font)
+        self.label_3.setStyleSheet("background: white;")
+        self.label_3.setAlignment(QtCore.Qt.AlignCenter)
+        self.label_3.setObjectName("label_3")
+        self.label_4 = QtWidgets.QLabel(self.centralwidget)
+        self.label_4.setGeometry(QtCore.QRect(10, 590, 131, 40))
+        self.font = QtGui.QFont()
+        self.font.setFamily("Optima")
+        self.font.setPointSize(24)
+        self.label_4.setFont(self.font)
+        self.label_4.setStyleSheet("background: white;")
+        self.label_4.setAlignment(QtCore.Qt.AlignCenter)
+        self.label_4.setObjectName("label_4")
+        self.label_5 = QtWidgets.QLabel(self.centralwidget)
+        self.label_5.setGeometry(QtCore.QRect(140, 540, 21, 91))
+        self.font = QtGui.QFont()
+        self.font.setFamily("Optima")
+        self.font.setPointSize(64)
+        self.label_5.setFont(self.font)
+        self.label_5.setStyleSheet("background: white;")
+        self.label_5.setObjectName("label_5")
+        self.label_6 = QtWidgets.QLabel(self.centralwidget)
+        self.label_6.setGeometry(QtCore.QRect(160, 549, 81, 91))
+        self.font = QtGui.QFont()
+        self.font.setFamily("Charter")
+        self.font.setPointSize(48)
+        self.font.setItalic(False)
+        self.label_6.setFont(self.font)
+        self.label_6.setStyleSheet("background: white;")
+        self.label_6.setAlignment(QtCore.Qt.AlignCenter)
+        self.label_6.setObjectName("label_6")
+
+        # set ultrasonic feed
+        self.label_3.setText("Ultrasonic")
+        self.label_4.setText("Sensor (cm)")
+        self.label_5.setText(":")
+        self.label_6.setText("Na")
+
         # standard stuff
         self.setCentralWidget(self.centralwidget)
         self.menubar = QtWidgets.QMenuBar(self)
@@ -102,12 +186,18 @@ class MyWindow(QMainWindow):
         QtCore.QMetaObject.connectSlotsByName(self)
 
         # mapping button presses
+        self.training_button.clicked.connect(lambda: self.change_mode('training_mode'))
+        self.testing_button.clicked.connect(lambda: self.change_mode('testing_mode'))
+
+
 
     def retranslateUi(self):
+        # set window title
         _translate = QtCore.QCoreApplication.translate
         self.setWindowTitle(_translate("MainWindow", "AutonomousRC Companion"))
 
     def keyPressEvent(self, event):
+        # key down with WASD mapping
         if event.text().lower() == 'w':
             self.icon2.addPixmap(QtGui.QPixmap("assets/after/gui_arrow_up_after.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
             self.forward.setIcon(self.icon2)
@@ -122,6 +212,7 @@ class MyWindow(QMainWindow):
             self.right.setIcon(self.icon5)
 
     def keyReleaseEvent(self, event):
+        # key up with WASD mapping
         if event.text().lower() == 'w':
             self.icon2.addPixmap(QtGui.QPixmap("assets/before/gui_arrow_up_before.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
             self.forward.setIcon(self.icon2)
@@ -138,6 +229,6 @@ class MyWindow(QMainWindow):
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
-    win = MyWindow()
+    win = ARC_Companion()
     win.show()
     sys.exit(app.exec_())
