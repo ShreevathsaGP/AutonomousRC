@@ -43,13 +43,9 @@ class ARC_Companion(QMainWindow):
             image_stream.write(self.connection.read(frame_length))
             image_stream.seek(0)
             frame = np.array(Image.open(image_stream))
-            
             width, height, channels = frame.shape
-            step = channels * width
-
-            print(width/height, step, width/channels, height/channels)
-            
-            self.frame = QtGui.QImage(frame, width, height, step, QtGui.QImage.Format_RGB888)
+                                    # np-array    height  width  step=>channels*width     rgb format (888)
+            self.frame = QtGui.QImage(frame.data, height, width, frame.strides[0], QtGui.QImage.Format_RGB888)
             self.label.setPixmap(QtGui.QPixmap.fromImage(self.frame))
         except Exception as e:
             print(e)
