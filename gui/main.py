@@ -1,8 +1,18 @@
+# gui imports
 from PyQt5 import QtWidgets
 from PyQt5.QtWidgets import QApplication, QMainWindow
 from PyQt5 import QtCore, QtGui, QtWidgets
 import sys
 import time, datetime
+
+# socket imports
+import socket
+import struct
+import io
+import pickle
+import numpy as np
+from PIL import Image
+
 
 class ARC_Companion(QMainWindow):
     def __init__(self):
@@ -10,10 +20,32 @@ class ARC_Companion(QMainWindow):
 
         # initializing global constants
         self.mode = 'training_mode'
+        self.HOST = '192.168.0.109'
+        self.PORT = 4999
     
-        # initualizing UI
+        # initualizing app
         self.initUI()
+        self.initTCP()
 
+        # initializing raspberry pi camera feed
+        self.camera_timer = QtCore.QTimer()
+        self.camera_timer.timeout.connect(self.rpi_feed)
+        self.camera_timer.start(10)
+
+    def rpi_feed(self):
+        frame_length = struct.unpack('<L', self.connection.read(struct.calcsize('<L')))[0]
+        if not frame_length:
+            pass
+
+        # stream for frames
+        image_stream = io.BytesIO()
+        image_stream.write(self.connection.read(frame_length))
+        image_stream.seek(0)
+        frame = np.array(Image.open(image_stream))
+        print(frame.shape)
+        self.frame = QtGui.QImage(frame, frame.shape[0], frame.shape[1], frame.shape[2]*frame.shape[0], QtGui.QImage.Format_RGB888)
+        self.label.setPixmap(QtGui.QPixmap.fromImage(self.frame))
+        
     def change_mode(self, mode):
         if mode == 'training_mode' and self.mode != 'training_mode':
             # set new mode
@@ -38,6 +70,13 @@ class ARC_Companion(QMainWindow):
             # deselect training_mode
             self.icon.addPixmap(QtGui.QPixmap("assets/training_mode.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
             self.training_button.setIcon(self.icon)
+
+    def initTCP(self):
+        self.server_socket = socket.socket()
+        self.server_socket.bind((self.HOST, self.PORT))
+        self.server_socket.listen(0)
+
+        self.connection = self.server_socket.accept()[0].makefile('rb')
     
     def initUI(self):
         # background
@@ -68,11 +107,11 @@ class ARC_Companion(QMainWindow):
         self.testing_button.setIcon(self.icon1)
         self.testing_button.setIconSize(QtCore.QSize(400, 55))
         self.testing_button.setObjectName("testing_button")
-        self.label = QtWidgets.QLabel(self.centralwidget)
 
         # design and set raspberry pi camera feed
+        self.label = QtWidgets.QLabel(self.centralwidget)
         self.label.setGeometry(QtCore.QRect(6, 63, 794, 471))
-        self.label.setStyleSheet("background: black; border: 3px solid black")
+        self.label.setStyleSheet("border: 3px solid black")
         self.label.setText("")
         self.label.setObjectName("label")
 
@@ -188,8 +227,6 @@ class ARC_Companion(QMainWindow):
         # mapping button presses
         self.training_button.clicked.connect(lambda: self.change_mode('training_mode'))
         self.testing_button.clicked.connect(lambda: self.change_mode('testing_mode'))
-
-
 
     def retranslateUi(self):
         # set window title
