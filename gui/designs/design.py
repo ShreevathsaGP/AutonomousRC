@@ -40,6 +40,7 @@ class Ui_MainWindow(object):
         self.label.setGeometry(QtCore.QRect(6, 63, 794, 471))
         self.label.setStyleSheet("background: white; border: 3px solid black")
         self.label.setText("")
+        
         self.label.setObjectName("label")
         self.forward = QtWidgets.QPushButton(self.centralwidget)
         self.forward.setGeometry(QtCore.QRect(270, 538, 111, 111))

@@ -37,14 +37,22 @@ class ARC_Companion(QMainWindow):
         if not frame_length:
             pass
 
-        # stream for frames
-        image_stream = io.BytesIO()
-        image_stream.write(self.connection.read(frame_length))
-        image_stream.seek(0)
-        frame = np.array(Image.open(image_stream))
-        print(frame.shape)
-        self.frame = QtGui.QImage(frame, frame.shape[0], frame.shape[1], frame.shape[2]*frame.shape[0], QtGui.QImage.Format_RGB888)
-        self.label.setPixmap(QtGui.QPixmap.fromImage(self.frame))
+        try:
+            # stream for frames
+            image_stream = io.BytesIO()
+            image_stream.write(self.connection.read(frame_length))
+            image_stream.seek(0)
+            frame = np.array(Image.open(image_stream))
+            
+            width, height, channels = frame.shape
+            step = channels * width
+
+            print(width/height, step, width/channels, height/channels)
+            
+            self.frame = QtGui.QImage(frame, width, height, step, QtGui.QImage.Format_RGB888)
+            self.label.setPixmap(QtGui.QPixmap.fromImage(self.frame))
+        except Exception as e:
+            print(e)
         
     def change_mode(self, mode):
         if mode == 'training_mode' and self.mode != 'training_mode':
@@ -113,6 +121,7 @@ class ARC_Companion(QMainWindow):
         self.label.setGeometry(QtCore.QRect(6, 63, 794, 471))
         self.label.setStyleSheet("border: 3px solid black")
         self.label.setText("")
+        self.label.setScaledContents(True)
         self.label.setObjectName("label")
 
         # forward button
