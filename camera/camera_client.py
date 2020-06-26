@@ -1,4 +1,4 @@
-# RasPi.py (Raspberry-Pi File)
+# camera_client.py (Raspberry-Pi File)
 
 # importing modules
 from Camera import Camera

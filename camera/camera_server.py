@@ -1,4 +1,4 @@
-# Remote.py (Mac File)
+# camer_server.py (Mac File)
 
 # importing modules
 from Camera import Camera
