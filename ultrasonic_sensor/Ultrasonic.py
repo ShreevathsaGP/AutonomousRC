@@ -10,11 +10,11 @@ import numpy as np
 import random
 
 class Ultrasonic:
-    def __init__(self):
+    def __init__(self, trigger_no, echo_no):
         # initializing constants
         self.significant_figures = 5
-        self.gpio_trigger = None
-        self.gpio_echo = None
+        self.gpio_trigger = trigger_no
+        self.gpio_echo = echo_no
         
 
     def server(self, host, port):
@@ -33,7 +33,7 @@ class Ultrasonic:
                 ultrasonic_stream.write(connection.read(self.significant_figures))
                 ultrasonic_stream.seek(0)
 
-                distance_value = int(ultrasonic_stream.read().decode('utf-8'))
+                distance_value = float(ultrasonic_stream.read().decode('utf-8'))
                 print(distance_value)
         finally:
             # close sockets
@@ -41,6 +41,10 @@ class Ultrasonic:
             server_socket.close()
 
     def get_distance_value(self):
+        # import client specific modules
+        import RPi.GPIO as GPIO
+        GPIO.setmode(GPIO.BCM)
+        
         # setup gpio pins
         GPIO.setup(self.gpio_trigger, GPIO.OUT)
         GPIO.setup(self.gpio_echo, GPIO.IN)
@@ -61,12 +65,9 @@ class Ultrasonic:
         # calculate distance value
         distance = time_taken / 0.000058
         
-        return distance
+        return str(round(distance, 5))
     
     def client(self, host, port):
-        # import client specific modules
-        import RPi.GPIO as GPIO
-        
         # client socket
         client_socket = socket.socket()
         client_socket.connect((host, port))
