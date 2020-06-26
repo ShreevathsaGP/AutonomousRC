@@ -12,7 +12,7 @@ import random
 class Ultrasonic:
     def __init__(self, trigger_no, echo_no):
         # initializing constants
-        self.significant_figures = 5
+        self.significant_figures = 20
         self.gpio_trigger = trigger_no
         self.gpio_echo = echo_no
         self.iteration = 0
@@ -65,7 +65,7 @@ class Ultrasonic:
 
         # calculate distance value
         distance = time_taken / 0.000058
-        distance = str(distance)[:5]
+        distance = f"{distance:<{self.significant_figures}}"
         print(distance)
         return distance
     
