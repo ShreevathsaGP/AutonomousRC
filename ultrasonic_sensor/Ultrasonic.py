@@ -66,7 +66,7 @@ class Ultrasonic:
         # calculate distance value
         distance = time_taken / 0.000058
         distance = str(distance)[:5]
-        
+        print(distance)
         return distance
     
     def client(self, host, port):
