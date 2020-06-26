@@ -29,16 +29,21 @@ class ARC_Companion(QMainWindow):
 
         # initializing raspberry pi camera feed
         self.camera_timer = QtCore.QTimer()
-        self.camera_timer.timeout.connect(self.rpi_feed)
+        self.camera_timer.timeout.connect(self.rpi_camera_feed)
         self.camera_timer.start(10)
 
-    def rpi_feed(self):
+        # initializing raspberry pi distance feed
+        self.distance_timer = QtCore.QTimer()
+        self.distance_timer.timeout.connect(self.rpi_distance_feed)
+##        self.distance_timer.start(10)
+
+    def rpi_camera_feed(self):
         frame_length = struct.unpack('<L', self.connection.read(struct.calcsize('<L')))[0]
         if not frame_length:
             pass
 
         try:
-            # stream for frames
+            # stream for frames and ultrasonic sensor values
             image_stream = io.BytesIO()
             image_stream.write(self.connection.read(frame_length))
             image_stream.seek(0)
@@ -49,6 +54,9 @@ class ARC_Companion(QMainWindow):
             self.label.setPixmap(QtGui.QPixmap.fromImage(self.frame))
         except Exception as e:
             print(e)
+            
+    def rpi_distance_feed(self):
+        pass
         
     def change_mode(self, mode):
         if mode == 'training_mode' and self.mode != 'training_mode':

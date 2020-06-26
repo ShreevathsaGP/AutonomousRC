@@ -62,8 +62,8 @@ class Camera:
         client_socket = socket.socket()
         client_socket.connect((host, port))
 
-        connection = client_socket.makefile('wb')
         # make writable file object with connection
+        connection = client_socket.makefile('wb')
 
         try:
             # configure camera
