@@ -35,7 +35,7 @@ class Ultrasonic:
                 ultrasonic_stream.seek(0)
 
                 distance_value = float(ultrasonic_stream.read().decode('utf-8'))
-                print(time.time())
+                print(distance_value)
         finally:
             # close sockets
             connection.close()

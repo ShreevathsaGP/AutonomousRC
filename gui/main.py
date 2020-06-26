@@ -21,11 +21,14 @@ class ARC_Companion(QMainWindow):
         # initializing global constants
         self.mode = 'training_mode'
         self.HOST = '192.168.0.104'
-        self.PORT = 4999
+        self.CAMERA_PORT = 4999
+        self.DISTANCE_PORT = 4998
+        self.significant_figures = 20
     
         # initualizing app
         self.initUI()
-        self.initTCP()
+        self.initTCPCamera()
+        self.initTCPDistance()
 
         # initializing raspberry pi camera feed
         self.camera_timer = QtCore.QTimer()
@@ -35,7 +38,7 @@ class ARC_Companion(QMainWindow):
         # initializing raspberry pi distance feed
         self.distance_timer = QtCore.QTimer()
         self.distance_timer.timeout.connect(self.rpi_distance_feed)
-##        self.distance_timer.start(10)
+        self.distance_timer.start(10)
 
     def rpi_camera_feed(self):
         frame_length = struct.unpack('<L', self.connection.read(struct.calcsize('<L')))[0]
@@ -43,7 +46,7 @@ class ARC_Companion(QMainWindow):
             pass
 
         try:
-            # stream for frames and ultrasonic sensor values
+            # stream for frames
             image_stream = io.BytesIO()
             image_stream.write(self.connection.read(frame_length))
             image_stream.seek(0)
@@ -53,11 +56,27 @@ class ARC_Companion(QMainWindow):
             self.frame = QtGui.QImage(frame.data, height, width, frame.strides[0], QtGui.QImage.Format_RGB888)
             self.label.setPixmap(QtGui.QPixmap.fromImage(self.frame))
         except Exception as e:
+            # print error
             print(e)
             
     def rpi_distance_feed(self):
-        pass
-        
+        try:
+            # stream for ultrasonic sensor values
+            ultrasonic_stream = io.BytesIO()
+            ultrasonic_stream.write(self.connection2.read(self.significant_figures))
+            ultrasonic_stream.seek(0)
+
+            print(ultrasonic_stream.getvalue())
+            
+            distance_value = float(ultrasonic_stream.read().decode('utf-8'))
+            print(distance_value)
+
+            ultrasonic_stream.truncate(0)
+            
+        except Exception as e:
+            # print error
+            print(e)
+            
     def change_mode(self, mode):
         if mode == 'training_mode' and self.mode != 'training_mode':
             # set new mode
@@ -83,12 +102,19 @@ class ARC_Companion(QMainWindow):
             self.icon.addPixmap(QtGui.QPixmap("assets/training_mode.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
             self.training_button.setIcon(self.icon)
 
-    def initTCP(self):
+    def initTCPCamera(self):
         self.server_socket = socket.socket()
-        self.server_socket.bind((self.HOST, self.PORT))
+        self.server_socket.bind((self.HOST, self.CAMERA_PORT))
         self.server_socket.listen(0)
 
         self.connection = self.server_socket.accept()[0].makefile('rb')
+
+    def initTCPDistance(self):
+        self.server_socket2 = socket.socket()
+        self.server_socket2.bind((self.HOST, self.DISTANCE_PORT))
+        self.server_socket2.listen(0)
+
+        self.connection2 = self.server_socket2.accept()[0].makefile('rb')
     
     def initUI(self):
         # background
