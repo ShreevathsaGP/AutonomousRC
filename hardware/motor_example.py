@@ -34,3 +34,4 @@ GPIO.output(Motor1E, GPIO.LOW)
 
 # ending GPIOs
 GPIO.cleanup()
+
