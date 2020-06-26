@@ -15,6 +15,7 @@ class Ultrasonic:
         self.significant_figures = 5
         self.gpio_trigger = trigger_no
         self.gpio_echo = echo_no
+        self.iteration = 0
         
 
     def server(self, host, port):
@@ -34,7 +35,7 @@ class Ultrasonic:
                 ultrasonic_stream.seek(0)
 
                 distance_value = float(ultrasonic_stream.read().decode('utf-8'))
-                print(distance_value)
+                print(time.time())
         finally:
             # close sockets
             connection.close()
@@ -64,17 +65,20 @@ class Ultrasonic:
 
         # calculate distance value
         distance = time_taken / 0.000058
+        distance = str(distance)[:5]
         
-        return str(round(distance, 5))
+        return distance
     
     def client(self, host, port):
-        # client socket
-        client_socket = socket.socket()
-        client_socket.connect((host, port))
+        if self.iteration == 0:
+            self.iteration +=1
+            # client socket
+            client_socket = socket.socket()
+            client_socket.connect((host, port))
 
-        # make writable file object with connection
-        connection = client_socket.makefile('wb')
-
+            # make writable file object with connection
+            connection = client_socket.makefile('wb')
+        
         try:
             # write distance into the connection file
             while True:
