@@ -7,11 +7,15 @@ import time
 import io
 import pickle
 import numpy as np
+import random
 
 class Ultrasonic:
     def __init__(self):
         # initializing constants
         self.significant_figures = 5
+        self.gpio_trigger = None
+        self.gpio_echo = None
+        
 
     def server(self, host, port):
         # server socket
@@ -34,12 +38,35 @@ class Ultrasonic:
         finally:
             # close sockets
             connection.close()
-            client_socket.close()
+            server_socket.close()
 
     def get_distance_value(self):
-        return None
+        # setup gpio pins
+        GPIO.setup(self.gpio_trigger, GPIO.OUT)
+        GPIO.setup(self.gpio_echo, GPIO.IN)
+
+        # trigger sensor
+        GPIO.output(self.gpio_trigger, True)
+        time.sleep(0.00001)
+        GPIO.output(self.gpio_trigger, False)
+
+        # measure time taken for return signal
+        start = time.time()
+        while GPIO.input(self.gpio_echo) == False:
+            start = time.time()
+        while GPIO.input(self.gpio_echo) == True:
+            end = time.time()
+        time_taken = end - start
+
+        # calculate distance value
+        distance = time_taken / 0.000058
+        
+        return distance
     
     def client(self, host, port):
+        # import client specific modules
+        import RPi.GPIO as GPIO
+        
         # client socket
         client_socket = socket.socket()
         client_socket.connect((host, port))
@@ -48,11 +75,10 @@ class Ultrasonic:
         connection = client_socket.makefile('wb')
 
         try:
-            # get value from distance sensor
-            distance_value = self.get_distance_value()
-
-            # write into the connection file
+            # write distance into the connection file
             while True:
+                # get value from distance sensor
+                distance_value = self.get_distance_value()
                 connection.write(bytes(distance_value, 'utf-8'))
         finally:
             # close sockets
