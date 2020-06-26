@@ -20,7 +20,7 @@ class ARC_Companion(QMainWindow):
 
         # initializing global constants
         self.mode = 'training_mode'
-        self.HOST = '192.168.0.109'
+        self.HOST = '192.168.0.104'
         self.PORT = 4999
     
         # initualizing app
