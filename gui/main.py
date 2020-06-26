@@ -66,12 +66,8 @@ class ARC_Companion(QMainWindow):
             ultrasonic_stream.write(self.connection2.read(self.significant_figures))
             ultrasonic_stream.seek(0)
 
-            print(ultrasonic_stream.getvalue())
-            
             distance_value = float(ultrasonic_stream.read().decode('utf-8'))
             print(distance_value)
-
-            ultrasonic_stream.truncate(0)
             
         except Exception as e:
             # print error
