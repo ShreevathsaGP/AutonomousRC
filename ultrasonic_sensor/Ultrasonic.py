@@ -52,7 +52,7 @@ class Ultrasonic:
 
             # write into the connection file
             while True:
-                connection.write(bytes('2389764378926', 'utf-8'))
+                connection.write(bytes(distance_value, 'utf-8'))
         finally:
             # close sockets
             connection.close()
