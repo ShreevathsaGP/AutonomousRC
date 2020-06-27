@@ -76,15 +76,16 @@ class Ultrasonic:
             client_socket = socket.socket()
             client_socket.connect((host, port))
 
-            # make writable file object with connection
-            connection = client_socket.makefile('wb')
+##            # make writable file object with connection
+##            connection = client_socket.makefile('wb')
         
         try:
             # write distance into the connection file
             while True:
                 # get value from distance sensor
                 distance_value = self.get_distance_value()
-                connection.write(bytes(distance_value, 'utf-8'))
+##                connection.write(bytes(distance_value, 'utf-8'))
+                client_socket.send(bytes(distance_value, 'utf-8'))
         finally:
             # close sockets
             connection.close()
