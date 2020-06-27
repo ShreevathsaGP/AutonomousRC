@@ -28,17 +28,19 @@ class ARC_Companion(QMainWindow):
         # initualizing app
         self.initUI()
         self.initTCPCamera()
-        self.initTCPDistance()
 
         # initializing raspberry pi camera feed
         self.camera_timer = QtCore.QTimer()
         self.camera_timer.timeout.connect(self.rpi_camera_feed)
         self.camera_timer.start(10)
 
+        '''
         # initializing raspberry pi distance feed
+        self.initTCPDistance()
         self.distance_timer = QtCore.QTimer()
         self.distance_timer.timeout.connect(self.rpi_distance_feed)
         self.distance_timer.start(10)
+        '''
 
     def rpi_camera_feed(self):
         frame_length = struct.unpack('<L', self.connection.read(struct.calcsize('<L')))[0]
@@ -55,20 +57,6 @@ class ARC_Companion(QMainWindow):
                                     # np-array    height  width  step=>channels*width     rgb format (888)
             self.frame = QtGui.QImage(frame.data, height, width, frame.strides[0], QtGui.QImage.Format_RGB888)
             self.label.setPixmap(QtGui.QPixmap.fromImage(self.frame))
-        except Exception as e:
-            # print error
-            print(e)
-            
-    def rpi_distance_feed(self):
-        try:
-            # stream for ultrasonic sensor values
-            ultrasonic_stream = io.BytesIO()
-            ultrasonic_stream.write(self.connection2.read(self.significant_figures))
-            ultrasonic_stream.seek(0)
-
-            distance_value = float(ultrasonic_stream.read().decode('utf-8'))
-            print(distance_value)
-            
         except Exception as e:
             # print error
             print(e)
