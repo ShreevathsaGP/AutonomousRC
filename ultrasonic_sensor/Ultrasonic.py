@@ -16,6 +16,7 @@ class Ultrasonic:
         self.gpio_trigger = trigger_no
         self.gpio_echo = echo_no
         self.iteration = 0
+        self.gpio_iteration = 0
         
 
     def server(self, host, port):
@@ -42,13 +43,16 @@ class Ultrasonic:
             server_socket.close()
 
     def get_distance_value(self):
-        # import client specific modules
-        import RPi.GPIO as GPIO
-        GPIO.setmode(GPIO.BCM)
-        
-        # setup gpio pins
-        GPIO.setup(self.gpio_trigger, GPIO.OUT)
-        GPIO.setup(self.gpio_echo, GPIO.IN)
+        if self.gpio_iteration == 0:
+            # import client specific modules
+            import RPi.GPIO as GPIO
+            GPIO.setmode(GPIO.BCM)
+            
+            # setup gpio pins
+            GPIO.setup(self.gpio_trigger, GPIO.OUT)
+            GPIO.setup(self.gpio_echo, GPIO.IN)
+
+            self.gpio_iteration += 1
 
         # trigger sensor
         GPIO.output(self.gpio_trigger, True)
@@ -58,8 +62,13 @@ class Ultrasonic:
         # measure time taken for return signal
         start = time.time()
         while GPIO.input(self.gpio_echo) == False:
+            if start - time.time() > 0.5:
+                break
             start = time.time()
         while GPIO.input(self.gpio_echo) == True:
+            if start - time.time() > 0.5:
+                end = 10
+                break
             end = time.time()
         time_taken = end - start
 
@@ -76,19 +85,22 @@ class Ultrasonic:
             client_socket = socket.socket()
             client_socket.connect((host, port))
 
-##            # make writable file object with connection
-##            connection = client_socket.makefile('wb')
+            # import client specific modules
+            import RPi.GPIO as GPIO
+            GPIO.setmode(GPIO.BCM)
+            
+            # setup gpio pins
+            GPIO.setup(self.gpio_trigger, GPIO.OUT)
+            GPIO.setup(self.gpio_echo, GPIO.IN)
         
         try:
             # write distance into the connection file
             while True:
                 # get value from distance sensor
                 distance_value = self.get_distance_value()
-##                connection.write(bytes(distance_value, 'utf-8'))
                 client_socket.send(bytes(distance_value, 'utf-8'))
         finally:
             # close sockets
-            connection.close()
             client_socket.close()
 
     def start(self, role, host, port=4998):
