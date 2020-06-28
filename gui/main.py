@@ -23,17 +23,25 @@ class ARC_Companion(QMainWindow):
         self.HOST = '192.168.0.104'
         self.CAMERA_PORT = 4999
         self.DISTANCE_PORT = 4998
+        self.KEY_PORT = 4997
         self.significant_figures = 20
+        self.key_state = [0 for i in range(4)]
     
         # initualizing app
         self.initUI()
         self.initTCPCamera()
+        self.initTCPKey()
 
         # initializing raspberry pi camera feed
         self.camera_timer = QtCore.QTimer()
         self.camera_timer.timeout.connect(self.rpi_camera_feed)
         self.camera_timer.start(10)
 
+        # initializing key press feed
+        self.key_timer = QtCore.QTimer()
+        self.key_timer.timeout.connect(self.key_feed)
+        self.key_timer.start(10)
+        
         '''
         # initializing raspberry pi distance feed
         self.initTCPDistance()
@@ -43,14 +51,14 @@ class ARC_Companion(QMainWindow):
         '''
 
     def rpi_camera_feed(self):
-        frame_length = struct.unpack('<L', self.connection.read(struct.calcsize('<L')))[0]
+        frame_length = struct.unpack('<L', self.camera_connection.read(struct.calcsize('<L')))[0]
         if not frame_length:
             pass
 
         try:
             # stream for frames
             image_stream = io.BytesIO()
-            image_stream.write(self.connection.read(frame_length))
+            image_stream.write(self.camera_connection.read(frame_length))
             image_stream.seek(0)
             frame = np.array(Image.open(image_stream))
             width, height, channels = frame.shape
@@ -60,6 +68,20 @@ class ARC_Companion(QMainWindow):
         except Exception as e:
             # print error
             print(e)
+
+    def key_feed(self):
+        # send key state to raspberry pi
+        try:
+            # 1=True & 0=False --> [W,A,S,D]
+            self.key_socket.send(pickle.dumps(self.key_state))
+        except Exception as e:
+            # print error (if any)
+            print(e)
+
+    '''
+    def distance_feed(self):
+        pass
+    '''
             
     def change_mode(self, mode):
         if mode == 'training_mode' and self.mode != 'training_mode':
@@ -91,14 +113,27 @@ class ARC_Companion(QMainWindow):
         self.server_socket.bind((self.HOST, self.CAMERA_PORT))
         self.server_socket.listen(0)
 
-        self.connection = self.server_socket.accept()[0].makefile('rb')
+        self.camera_socket, address = self.server_socket.accept()
+        print(f"CAM CONNECTION ESTABLISHED WITH :--> {address}")
+        self.camera_connection = self.camera_socket.makefile('rb')
 
+    def initTCPKey(self):
+        self.server_socket3 = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self.server_socket3.bind((self.HOST, self.KEY_PORT))
+        self.server_socket3.listen(0)
+
+        self.key_socket, address = self.server_socket3.accept()
+        print(f"KEY CONNECTION ESTABLISHED WITH :--> {address}")
+    
+    '''
     def initTCPDistance(self):
         self.server_socket2 = socket.socket()
         self.server_socket2.bind((self.HOST, self.DISTANCE_PORT))
         self.server_socket2.listen(0)
 
-        self.connection2 = self.server_socket2.accept()[0].makefile('rb')
+        self.client_socket2, address = self.server_socket2.accept()
+        self.distance_connection = self.client_socket2.makefile('rb')
+    '''
     
     def initUI(self):
         # background
@@ -261,30 +296,52 @@ class ARC_Companion(QMainWindow):
         if event.text().lower() == 'w':
             self.icon2.addPixmap(QtGui.QPixmap("assets/after/gui_arrow_up_after.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
             self.forward.setIcon(self.icon2)
+
+            self.key_state[0] = 1
+            
         elif event.text().lower() == 'a':
             self.icon3.addPixmap(QtGui.QPixmap("assets/after/gui_arrow_left_after.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
             self.left.setIcon(self.icon3)
+
+            self.key_state[1] = 1
+            
         elif event.text().lower() == 's':
             self.icon4.addPixmap(QtGui.QPixmap("assets/after/gui_arrow_down_after.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
             self.reverse.setIcon(self.icon4)
+
+            self.key_state[2] = 1
+            
         elif event.text().lower() == 'd':
             self.icon5.addPixmap(QtGui.QPixmap("assets/after/gui_arrow_right_after.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
             self.right.setIcon(self.icon5)
+
+            self.key_state[3] = 1
 
     def keyReleaseEvent(self, event):
         # key up with WASD mapping
         if event.text().lower() == 'w':
             self.icon2.addPixmap(QtGui.QPixmap("assets/before/gui_arrow_up_before.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
             self.forward.setIcon(self.icon2)
+
+            self.key_state[0] = 0
+            
         elif event.text().lower() == 'a':
             self.icon3.addPixmap(QtGui.QPixmap("assets/before/gui_arrow_left_before.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
             self.left.setIcon(self.icon3)
+
+            self.key_state[1] = 0
+            
         elif event.text().lower() == 's':
             self.icon4.addPixmap(QtGui.QPixmap("assets/before/gui_arrow_down_before.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
             self.reverse.setIcon(self.icon4)
+
+            self.key_state[2] = 0
+            
         elif event.text().lower() == 'd':
             self.icon5.addPixmap(QtGui.QPixmap("assets/before/gui_arrow_right_before.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
             self.right.setIcon(self.icon5)
+
+            self.key_state[3] = 0
         
 
 if __name__ == "__main__":
