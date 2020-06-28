@@ -16,7 +16,7 @@ class KeyPress:
         # server socket
         server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         server_socket.bind((host, port))
-        server_socket.listen(0)
+        server_socket.liten(0)
 
         try:
             # accept connection
@@ -31,6 +31,7 @@ class KeyPress:
                 # real key_state will be done with PyQt5
                 client_socket.send(pickle.dumps(key_state))
         finally:
+            client_socket.disconnect()
             server_socket.close()
 
     def client(self, host, port):
@@ -40,8 +41,11 @@ class KeyPress:
 
         # get constant state of keyboard from server
         while True:
-            key_state = client_socket.recv(1024)
-            print(pickle.loads(key_state))
+            try:
+                key_state = client_socket.recv(1024)
+                print(pickle.loads(key_state))
+            except Exception as e:
+                print(e)
 
     def start(self, role, host, port=4997):
         # begin socket connection
