@@ -13,7 +13,7 @@ class Camera:
         # initializing contants
         self.width = 320
         self.height = 240
-        self.vflip = True
+        self.vflip = False
 
     def server(self, host, port):
         # importing server spcific modules

@@ -3,43 +3,37 @@ import time
 
 GPIO.setmode(GPIO.BCM)
 
-Motor1A = 23
-Motor1B = 24
-Motor1E = 25
+
+Motor1A = 13
+Motor1B = 19
+Motor1E = 26
+
+Motor2A = 16
+Motor2B = 20
+Motor2E = 21
 
 GPIO.setup(Motor1A, GPIO.OUT)
 GPIO.setup(Motor1B, GPIO.OUT)
 GPIO.setup(Motor1E, GPIO.OUT)
 
-print("Turning motor on)")
+GPIO.setup(Motor2A, GPIO.OUT)
+GPIO.setup(Motor2B, GPIO.OUT)
+GPIO.setup(Motor2E, GPIO.OUT)
+
+print("Turning motor FR on)")
 GPIO.output(Motor1A, GPIO.HIGH)
 GPIO.output(Motor1B, GPIO.LOW)
+GPIO.output(Motor1E, True)
 
-##GPIO.output(Motor1E, GPIO.HIGH)
-##time.sleep(2)
-##
-##print("Turning motor off")
-##GPIO.output(Motor1E, GPIO.LOW)
-##
-##time.sleep(2)
-##
-##print("Turning motor back on")
-##GPIO.output(Motor1E, GPIO.HIGH)
-##time.sleep(2)
+print("Turning motor FL on")
+GPIO.output(Motor2A, GPIO.HIGH)
+GPIO.output(Motor2B, GPIO.LOW)
+GPIO.output(Motor2E, GPIO.HIGH)
 
-# use pwm on 25 (Motor1E) at 100Hz
-time.sleep(1)
-print("Starting pulse width modulation")
-pwm = GPIO.PWM(25, 100)
-duty_cycle = 0
+time.sleep(5)
 
-for i in range(0,101, 2):
-    duty_cycle = i
-    pwm.start(duty_cycle)
-    time.sleep(0.5)
-
-time.sleep(4)
-print("Ending pulse width modulation")
-pwm.stop()
+print("Turning both motors off")
+GPIO.output(Motor1E, GPIO.LOW)
+GPIO.output(Motor2E, True)
 
 GPIO.cleanup()
