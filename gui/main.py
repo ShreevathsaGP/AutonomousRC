@@ -20,7 +20,7 @@ class ARC_Companion(QMainWindow):
 
         # initializing global constants
         self.mode = 'training_mode'
-        self.HOST = '192.168.0.104'
+        self.HOST = '192.168.43.216'
         self.CAMERA_PORT = 4999
         self.DISTANCE_PORT = 4998
         self.KEY_PORT = 4997
