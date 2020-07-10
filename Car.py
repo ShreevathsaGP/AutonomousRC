@@ -1,5 +1,9 @@
 # Car.py (Raspberry-Pi File)
 
+# camera multiprocessing imports
+from camera.Camera import Camera
+import multiprocessing
+
 # import car wide modules
 import time, datetime, os
 import RPi.GPIO as GPIO
@@ -28,7 +32,7 @@ class Car:
 
         # PWM (Pulse Width Modulation) constants
         self.frequency = 100 # Hertz
-        self.duty_cycle = 75
+        self.duty_cycle = 70
 
         # Recording state of the car
         self.already_reset = False
@@ -66,7 +70,7 @@ class Car:
     def forward(self):
         self.already_reset = False
         
-        print("forward")
+##        print("forward")
         if self.speed_mode == 'chill':
             self.lfPWM.start(self.duty_cycle)
             self.rfPWM.start(self.duty_cycle)
@@ -77,7 +81,7 @@ class Car:
     def reverse(self):
         self.already_reset = False
         
-        print("reverse")
+##        print("reverse")
         if self.speed_mode == 'chill':
             self.lbPWM.start(self.duty_cycle)
             self.rbPWM.start(self.duty_cycle)
@@ -88,38 +92,38 @@ class Car:
     def forward_right(self):
         self.already_reset = False
         
-        print("forward right")
+##        print("forward right")
         if self.speed_mode == 'chill':
             self.rfPWM.start(90)
         elif self.speed_mode == 'ludicrous':
-            pass
+            GPIO.output(self.right_backward, GPIO.HIGH)
 
     def backward_right(self):
         self.already_reset = False
 
-        print("backward right")
+##        print("backward right")
         if self.speed_mode == 'chill':
             self.rbPWM.start(90)
         elif self.speed_mode == 'ludicrous':
-            pass
+            GPIO.output(self.right_forward, GPIO.HIGH)
 
     def forward_left(self):
         self.already_reset = False
         
-        print("forward left")
+##        print("forward left")
         if self.speed_mode == 'chill':
             self.lfPWM.start(90)
         elif self.speed_mode == 'ludicrous':
-            pass
+            GPIO.output(self.left_backward, GPIO.HIGH)
 
     def backward_left(self):
         self.already_reset = False
 
-        print("backward left")
+##        print("backward left")
         if self.speed_mode == 'chill':
             self.lbPWM.start(90)
         elif self.speed_mode == 'ludicrous':
-            pass
+            GPIO.output(self.left_forward, GPIO.HIGH)
     
     def listen(self):
         """ Input Format: [W,A,S,D] --> 1 = Pressed & 0 = NotPressed """
@@ -172,6 +176,19 @@ class Car:
                 print(e)
                 pass
 
-# Define car object and run()
-AutonomousRC = Car('chill', 'training')
-AutonomousRC.listen()
+def camera_target():
+    # Define camera object and run()
+    Camera().start('client', '192.168.0.104')
+##    print("camera starting")
+
+def car_target():
+    # Define car object and run()
+    AutonomousRC = Car('chill', 'ludicrous')
+    AutonomousRC.listen()
+##    print("car booting")
+
+camera_process = multiprocessing.Process(target=camera_target)
+car_process = multiprocessing.Process(target=car_target)
+
+camera_process.start()
+car_process.start()
