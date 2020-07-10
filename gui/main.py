@@ -20,7 +20,7 @@ class ARC_Companion(QMainWindow):
 
         # initializing global constants
         self.mode = 'training_mode'
-        self.HOST = '192.168.43.216'
+        self.HOST = '192.168.0.104'
         self.CAMERA_PORT = 4999
         self.DISTANCE_PORT = 4998
         self.KEY_PORT = 4997
@@ -51,9 +51,13 @@ class ARC_Companion(QMainWindow):
         '''
 
     def rpi_camera_feed(self):
-        frame_length = struct.unpack('<L', self.camera_connection.read(struct.calcsize('<L')))[0]
-        if not frame_length:
-            pass
+        try:
+            frame_length = struct.unpack('<L', self.camera_connection.read(struct.calcsize('<L')))[0]
+            if not frame_length:
+                pass
+        except Exception as e:
+            # print error (if any)
+            print(e)
 
         try:
             # stream for frames

@@ -16,7 +16,7 @@ class KeyPress:
         # server socket
         server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         server_socket.bind((host, port))
-        server_socket.liten(0)
+        server_socket.listen(0)
 
         try:
             # accept connection
