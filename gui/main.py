@@ -4,6 +4,7 @@ from PyQt5.QtWidgets import QApplication, QMainWindow
 from PyQt5 import QtCore, QtGui, QtWidgets
 import sys
 import time, datetime
+import pickle
 
 # socket imports
 import socket
