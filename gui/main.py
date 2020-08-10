@@ -21,7 +21,7 @@ class ARC_Companion(QMainWindow):
 
         # initializing global constants
         self.mode = 'training_mode'
-        self.HOST = '192.168.0.104'
+        self.HOST = '192.168.0.105'
         self.CAMERA_PORT = 4999
         self.DISTANCE_PORT = 4998
         self.KEY_PORT = 4997
@@ -66,6 +66,10 @@ class ARC_Companion(QMainWindow):
             image_stream.write(self.camera_connection.read(frame_length))
             image_stream.seek(0)
             frame = np.array(Image.open(image_stream))
+
+            with open('../storage/current_frame.pickle', 'wb') as frame_storage:                
+                frame_storage.write(pickle.dumps(frame))
+            
             width, height, channels = frame.shape
                                     # np-array    height  width  step=>channels*width     rgb format (888)
             self.frame = QtGui.QImage(frame.data, height, width, frame.strides[0], QtGui.QImage.Format_RGB888)
@@ -296,6 +300,12 @@ class ARC_Companion(QMainWindow):
         _translate = QtCore.QCoreApplication.translate
         self.setWindowTitle(_translate("MainWindow", "AutonomousRC Companion"))
 
+    def virtualKeyPress(self, key):
+        pass
+
+    def virtualKeyRelease(self, key):
+        pass
+        
     def keyPressEvent(self, event):
         # key down with WASD mapping
         if event.text().lower() == 'w':
@@ -322,7 +332,7 @@ class ARC_Companion(QMainWindow):
 
             self.key_state[3] = 1
 
-    def keyReleaseEvent(self, event):
+    def keyReleaseEvent(self, event):        
         # key up with WASD mapping
         if event.text().lower() == 'w':
             self.icon2.addPixmap(QtGui.QPixmap("assets/before/gui_arrow_up_before.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)

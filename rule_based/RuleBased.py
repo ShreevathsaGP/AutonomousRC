@@ -9,6 +9,11 @@ from matplotlib.animation import FuncAnimation as dynamic_plt
 # A Rule Based approach to Autonomy with my RC Car
 class RuleBased:
     def __init__(self):
+        # random access storage
+        self.storage_frame = 'storage/current_frame.pickle'
+        self.storage_curve = 'storage/current_lane_radius.pickle'
+        self.storage_decision = 'storage/current_decision.pickle'
+        
         # frame info
         self.width = 320
         self.height = 240
@@ -34,6 +39,7 @@ class RuleBased:
         self.window_height = self.height // self.no_windows
         self.margin = 25
         self.minimum_relevant_pixels = 1
+        self.difference_threshold = 500
         self.curvature_value = None
 
         # meter to pixel
@@ -62,6 +68,7 @@ class RuleBased:
 
         # historgram peaks (average of where left & right lane is)
         histogram = np.sum(warped_image[warped_image.shape[0] // 2:,:], axis=0)
+        print(histogram)
         # midpoint index
         midpoint = int(histogram.shape[0] / 2)
         
@@ -139,6 +146,9 @@ class RuleBased:
         left_ys = nonzeroy[left_lane_indeces]
         right_xs = nonzerox[right_lane_indeces]
         right_ys = nonzeroy[right_lane_indeces]
+
+        print(len(left_xs), len(left_ys))
+        print(len(right_xs), len(right_ys))
     
         # fit quadratic equation to lanes
         pixel_left_quadratic = np.polyfit(left_ys, left_xs, 2)
@@ -169,7 +179,7 @@ class RuleBased:
                                       meter_left_quadratic[1]) ** 2) ** 1.5)\
                                / np.absolute(2 * meter_left_quadratic[0])
 
-        print(self.curvature_value)
+        print(f"Radius of curvature: {self.curvature_value}")
         
         blank_warped = np.zeros_like(og_warped).astype(np.uint8) # 0 => black warped
         colour_warped = np.dstack((blank_warped, blank_warped, blank_warped)) # coloured blank_warped
@@ -197,17 +207,22 @@ class RuleBased:
             final_image = cv2.addWeighted(self.original_frame, 1, fill_design, 0.5, 0)
             
         elif lane_design == 'dotted-curve':
-            Exception(f"Design {lane_design} currently unavailable")
+            print(Exception(f"Design '{lane_design}' currently unavailable"))
+            exit()
             
         return final_image, template, curve_radius, (pixel_left_quadratic, pixel_right_quadratic)
     
-    def start_pipeline(self, visualize=False):
-        capture = cv2.VideoCapture('../samples/lane_detection_sample.mp4')
+    def start_pipeline(self, visualize=False, sample_video=True):
+        if sample_video:
+            capture = cv2.VideoCapture('../samples/lane_detection_sample.mp4')
         
         # update figure (frame by frame)
         def update_figure(_):
             # get & make copy of frame(s)
-            ret, self.original_frame = capture.read()
+            if sample_video:
+                ret, self.original_frame = capture.read()
+            else:
+                self.original_frame = np.load('../storage/current_frame.pickle', allow_pickle=True)
             if self.original_frame.shape != (self.height, self.width):
                 self.original_frame = cv2.resize(self.original_frame, (self.width, self.height))
             
@@ -277,8 +292,11 @@ class RuleBased:
             # print only (no visualization)
             while True:
                 try:
-                    # get & make copy of frame(s)
-                    ret, self.original_frame = capture.read()
+                    if sample_video:
+                        # get & make copy of frame(s)
+                        ret, self.original_frame = capture.read()
+                    else:
+                        self.original_frane = np.load('../storage/current_frame.pickle', allow_pickle=True)
                     if self.original_frame.shape != (self.height, self.width):
                         self.original_frame = cv2.resize(self.original_frame, (self.width, self.height))
                     
@@ -302,4 +320,4 @@ class RuleBased:
                     break
             
 RuleBased_ARC = RuleBased()
-RuleBased_ARC.start_pipeline(visualize = False)
+RuleBased_ARC.start_pipeline(visualize = True)
